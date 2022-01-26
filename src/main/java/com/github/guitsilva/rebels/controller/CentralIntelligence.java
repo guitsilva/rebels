@@ -42,7 +42,6 @@ public class CentralIntelligence {
 
     writer.println("name, age, race");
 
-    System.out.println();
     for (Rebel rebel : this.rebels) {
       writer.printf("%s, %s, %s%n",
           rebel.getName(),
