@@ -3,6 +3,7 @@ package com.github.guitsilva.rebels.controller;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -13,7 +14,7 @@ import lombok.Cleanup;
 
 public class CentralIntelligence {
 
-  private final List<Rebel> rebels;
+  private List<Rebel> rebels;
 
   public CentralIntelligence() {
     this.rebels = new LinkedList<Rebel>();
@@ -23,7 +24,11 @@ public class CentralIntelligence {
     return this.rebels.size();
   }
 
-  public boolean evaluateRebelApplication(Rebel rebel) {
+  public boolean evaluateRebel(Rebel rebel) {
+
+    if (this.rebels.contains(rebel)) {
+      return false;
+    }
 
     int randomNumber = new Random().nextInt(10);
 
@@ -34,20 +39,33 @@ public class CentralIntelligence {
     return this.addRebel(rebel);
   }
 
-  public void generateReport(String fileName)
+  public void persistRebelsReport(String fileName)
       throws FileNotFoundException, UnsupportedEncodingException {
 
     @Cleanup
     PrintWriter writer = new PrintWriter(fileName, "UTF-8");
 
-    writer.println("name, age, race");
+    writer.print(this.getRebelsReport());
+  }
+
+  public void sortRebels(Comparator<Rebel> comparator) {
+    this.rebels.sort(comparator);
+  }
+
+  public String getRebelsReport() {
+
+    StringBuilder report = new StringBuilder();
+
+    report.append(String.format("name, age, race%n"));
 
     for (Rebel rebel : this.rebels) {
-      writer.printf("%s, %s, %s%n",
+      report.append(String.format("%s, %s, %s%n",
           rebel.getName(),
           rebel.getAge(),
-          rebel.getRace().toString().toLowerCase());
+          rebel.getRace().toString().toLowerCase()));
     }
+
+    return report.toString();
   }
 
   private boolean addRebel(Rebel rebel) {

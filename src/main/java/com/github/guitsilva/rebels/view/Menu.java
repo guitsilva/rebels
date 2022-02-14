@@ -41,7 +41,7 @@ public class Menu {
     System.out.println("#  Choose an option:            #");
     System.out.println("#                               #");
     System.out.println("#  [n] New Rebel                #");
-    System.out.println("#  [g] Generate Report          #");
+    System.out.println("#  [s] Save Rebels              #");
     System.out.println("#  [e] Exit                     #");
     System.out.println("#                               #");
     System.out.println("#################################");
@@ -50,7 +50,7 @@ public class Menu {
 
   public void print() {
 
-    String option = "";
+    String option;
 
     do {
 
@@ -65,15 +65,15 @@ public class Menu {
           this.newRebel();
           break;
 
-        case "g":
-          this.generateReport();
+        case "s":
+          this.saveRebels();
           break;
 
         case "e":
           continue;
 
         default:
-          System.out.println("Invalid option. Try again!");
+          this.emitWarning("Invalid option. Try again!");
       }
 
     } while (!option.equalsIgnoreCase("e"));
@@ -82,7 +82,7 @@ public class Menu {
   private void newRebel() {
     Rebel rebel = new NewRebel().get();
 
-    boolean rebelAccepted = this.intelligence.evaluateRebelApplication(rebel);
+    boolean rebelAccepted = this.intelligence.evaluateRebel(rebel);
 
     if (rebelAccepted) {
       this.emitWarning(String.format("%s is a rebel now!", rebel.getName()));
@@ -91,18 +91,80 @@ public class Menu {
     }
   }
 
-  private void generateReport() {
+  private void saveRebels() {
     String reportFileName = "rebels.csv";
+    String reportContent = "";
 
-    try {
-      this.intelligence.generateReport(reportFileName);
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
-    }
+    System.out.println();
+    System.out.println("Choose an order for the report:");
+    System.out.println("[n] - name");
+    System.out.println("[a] - age");
+    System.out.println("[r] - race");
 
-    this.emitWarning(String.format("%s generated!", reportFileName));
+    boolean invalidOrderOption;
+
+    do {
+
+      String option = this.prompt.read();
+
+      switch (option.toLowerCase()) {
+        case "n":
+          invalidOrderOption = false;
+          this.intelligence.sortRebels((a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+          break;
+
+        case "a":
+          invalidOrderOption = false;
+          this.intelligence.sortRebels((a, b) -> a.getAge() - b.getAge());
+          break;
+
+        case "r":
+          invalidOrderOption = false;
+          this.intelligence.sortRebels((a, b) -> a.getRace().compareTo(b.getRace()));
+          break;
+
+        default:
+          invalidOrderOption = true;
+          System.out.println("Invalid option. Try again!");
+      }
+
+    } while (invalidOrderOption);
+
+    reportContent = this.intelligence.getRebelsReport();
+
+    System.out.printf("%nRebels report:%n");
+    System.out.print(String.format("%n%s%n", reportContent));
+
+    boolean invalidSaveOption;
+
+    do {
+
+      String option = this.prompt.read(
+          String.format("Save to file (%s) [y/n]? ", reportFileName));
+
+      switch (option.toLowerCase()) {
+        case "y":
+          invalidSaveOption = false;
+          try {
+            this.intelligence.persistRebelsReport(reportFileName);
+          } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            this.emitWarning("Unable to generate report.");
+            break;
+          }
+
+          this.emitWarning(String.format("%s generated!", reportFileName));
+          break;
+
+        case "n":
+          invalidSaveOption = false;
+          break;
+
+        default:
+          invalidSaveOption = true;
+          System.out.println("Invalid option. Try again!");
+      }
+
+    } while (invalidSaveOption);
   }
 
   private void emitWarning(String warning) {

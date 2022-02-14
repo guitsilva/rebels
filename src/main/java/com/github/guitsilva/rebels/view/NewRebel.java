@@ -28,8 +28,22 @@ public class NewRebel {
   }
 
   private String promptName() {
-    System.out.println();
-    return this.prompt.read("Name: ");
+
+    String name;
+
+    while (true) {
+      System.out.println();
+      name = this.prompt.read("Name: ");
+
+      if (name.contains(",")) {
+        System.out.printf("%nName must not contain commas. Try again!%n");
+        continue;
+      }
+
+      break;
+    }
+
+    return name;
   }
 
   private short promptAge() {
@@ -43,12 +57,12 @@ public class NewRebel {
       try {
         age = Short.parseShort(ageInput);
       } catch (NumberFormatException e) {
-        System.out.printf("%nInvalid age. Try again!%n");
+        System.out.printf("%nAge must be an integer number. Try again!%n");
         continue;
       }
 
       if (age < 0) {
-        System.out.printf("%nInvalid age. Try again!%n");
+        System.out.printf("%nAge must be positive. Try again!%n");
         continue;
       }
 
@@ -76,7 +90,7 @@ public class NewRebel {
       try {
         raceIndex = Integer.parseInt(raceIndexString);
       } catch (NumberFormatException e) {
-        System.out.printf("%nInvalid race. Try again!%n");
+        System.out.printf("%nRace index must be an integer number. Try again!%n");
         continue;
       }
 
@@ -84,7 +98,7 @@ public class NewRebel {
         race = Race.values()[raceIndex];
         break;
       } else {
-        System.out.printf("%nInvalid race. Try again!%n");
+        System.out.printf("%nRace index out of bounds. Try again!%n");
       }
     }
 
